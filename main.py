@@ -1,4 +1,3 @@
-# Project 1 - CTA Database app
 # This app uses Python and SQL to query a CTA ridership database and output various statistics, plots and images
 
 import sqlite3
