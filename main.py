@@ -13,7 +13,8 @@ import matplotlib.pyplot as plt
 # SQL queries to retrieve and output basic stats.
 #
 
-#Prints general statistics about the connected datebase to the console
+
+# Prints general statistics about the connected datebase to the console
 def print_stats(dbConn):
     dbCursor = dbConn.cursor()
 
@@ -43,25 +44,27 @@ def print_stats(dbConn):
     row = dbCursor.fetchone()
     print("  Total ridership:", f"{row[0]:,}")
 
-#Prints all station names and their related IDs that match the users input
+
+# Prints all station names and their related IDs that match the users input
 def choice1(dbConn):
-    #Initial input and DB setup
+    # Initial input and DB setup
     dbCursor = dbConn.cursor()
     sql = "Select Station_ID, Station_Name From Stations Where Station_Name Like ? order by Station_Name asc;"
 
     inp = input("\nEnter partial station name (wildcards _ and %): ")
     dbCursor.execute(sql, [inp])
     result = dbCursor.fetchall()
-    #If station has matches, the names and IDs are printed
+    # If station has matches, the names and IDs are printed
     if len(result) == 0:
         print("**No stations found...")
     else:
         for row in result:
             print(row[0], ":", row[1])
 
-#Prints analytics about an inputted station, focusing around what number and percent of riders occured on Weekdays, Saturdays and Sundays
+
+# Prints analytics about an inputted station, focusing around what number and percent of riders occured on Weekdays, Saturdays and Sundays
 def choice2(dbConn):
-    #Initial input and DB setup
+    # Initial input and DB setup
     dbCursor = dbConn.cursor()
     sql = "Select Type_Of_Day, sum(Num_Riders) From Ridership Join Stations On Stations.Station_ID = Ridership.Station_ID Where Station_Name = ? group by Type_Of_Day order by Type_Of_Day asc;"
 
@@ -69,7 +72,7 @@ def choice2(dbConn):
 
     dbCursor.execute(sql, [inp])
     result = dbCursor.fetchall()
-    #If station is found, analytics are calculated and printed
+    # If station is found, analytics are calculated and printed
     if len(result) == 0:
         print("**No data found...")
     else:
@@ -87,9 +90,10 @@ def choice2(dbConn):
         print(" Sunday/Holiday ridership:", f"{sun:,}", f"({sunP:.2f}%)")
         print(" Total ridership:", f"{tot:,}")
 
-#Prints the weekday ridership total for each station in the database
+
+# Prints the weekday ridership total for each station in the database
 def choice3(dbConn):
-    #DB setup
+    # DB setup
     dbCursor = dbConn.cursor()
     sql = "Select Station_Name, sum(Num_Riders) from Ridership join Stations on Ridership.Station_ID = Stations.Station_ID where Type_Of_Day = 'W' group by Ridership.Station_ID order by sum(Num_Riders) desc;"
 
@@ -97,7 +101,7 @@ def choice3(dbConn):
     result = dbCursor.fetchall()
 
     tot = 0
-    #Find total riders on weekdays and use that to calculate percents
+    # Find total riders on weekdays and use that to calculate percents
     for row in result:
         tot += row[1]
     print("Ridership on Weekdays for Each Station")
@@ -106,9 +110,10 @@ def choice3(dbConn):
         per = (row[1] / tot) * 100
         print(row[0], ":", f"{row[1]:,}", f"({per:.2f}%)")
 
-#From an inputted line color and directions, prints the all station names, direction and if they are handicap accessible that are on that line and go in that direction
+
+# From an inputted line color and directions, prints the all station names, direction and if they are handicap accessible that are on that line and go in that direction
 def choice4(dbConn):
-    #Initial input and DB setup
+    # Initial input and DB setup
     inp = input("\nEnter a line color (e.g. Red or Yellow): ")
     inp = inp.lower()
 
@@ -117,7 +122,7 @@ def choice4(dbConn):
 
     dbCursor.execute(sql, [inp])
     result = dbCursor.fetchall()
-    #If line color is found, query direction
+    # If line color is found, query direction
     if len(result) == 0:
         print("**No such line...")
     else:
@@ -128,8 +133,8 @@ def choice4(dbConn):
 
         dbCursor.execute(sql, [inp, inp1])
         results = dbCursor.fetchall()
-        
-        #If given line runs in that direction, find and print all stops on given line and direction
+
+        # If given line runs in that direction, find and print all stops on given line and direction
         if len(results) == 0:
             print("**That line does not run in the direction chosen...")
         else:
@@ -140,16 +145,17 @@ def choice4(dbConn):
                     ada = "(not handicap accessible)"
                 print(row[0], ": direction =", inp1, ada)
 
-#Prints the number of stops for each line color, seperated by direction as well as what percent each group of stops make up of the overall stops
+
+# Prints the number of stops for each line color, seperated by direction as well as what percent each group of stops make up of the overall stops
 def choice5(dbConn):
-    #DB setup
+    # DB setup
     dbCursor = dbConn.cursor()
     sql = "Select Color, Direction, count(Stops.Stop_ID) from Lines join StopDetails on Lines.Line_ID = StopDetails.Line_ID join Stops on StopDetails.Stop_ID = Stops.Stop_ID group by Color,Direction order by Color asc;"
 
     dbCursor.execute(sql)
     result = dbCursor.fetchall()
-    
-    #Need to count from DB, as adding together stops from previous query didn't net correct result
+
+    # Need to count from DB, as adding together stops from previous query didn't net correct result
     sql = "Select count(Stops.Stop_ID) from Stops;"
 
     dbCursor.execute(sql)
@@ -162,9 +168,10 @@ def choice5(dbConn):
         percent = (row[2] / final) * 100
         print(row[0], "going", row[1], ":", row[2], f"({percent:.2f}%)")
 
-#Takes the input of a station, and prints the yearly ridership for all years in the database. There is then an option to plot the data as well
+
+# Takes the input of a station, and prints the yearly ridership for all years in the database. There is then an option to plot the data as well
 def choice6(dbConn):
-    #Initial input and DB setup
+    # Initial input and DB setup
     inp = input("\nEnter a station name (wildcards _ and %): ")
 
     dbCursor = dbConn.cursor()
@@ -172,7 +179,7 @@ def choice6(dbConn):
     dbCursor.execute(sql, [inp])
     name = dbCursor.fetchall()
 
-    #Checking to see if station is found/singular, it it is yearly ridership is printed for that station and option to plot is made available
+    # Checking to see if station is found/singular, it it is yearly ridership is printed for that station and option to plot is made available
     if len(name) == 0:
         print("**No station found...")
     elif len(name) > 1:
@@ -187,7 +194,7 @@ def choice6(dbConn):
         for row in result:
             print(row[0], ":", f"{row[1]:,}")
 
-        #Plotting portion starts here
+        # Plotting portion starts here
         choice = input("Plot? (y/n) ")
 
         if choice == "y":
@@ -197,8 +204,21 @@ def choice6(dbConn):
             plt.title(title)
             plt.xlabel("Years")
             plt.ylabel("Millions of Riders")
-            plt.yticks([0.2e6, 0.4e6, 0.6e6, 0.8e6, 1.0e6, 1.2e6, 1.4e6, 1.6e6, 1.8e6],["0.2M","0.4M","0.6M","0.8M","1.0M","1.2M","1.4M","1.6M","1.8M",])
-            
+            plt.yticks(
+                [0.2e6, 0.4e6, 0.6e6, 0.8e6, 1.0e6, 1.2e6, 1.4e6, 1.6e6, 1.8e6],
+                [
+                    "0.2M",
+                    "0.4M",
+                    "0.6M",
+                    "0.8M",
+                    "1.0M",
+                    "1.2M",
+                    "1.4M",
+                    "1.6M",
+                    "1.8M",
+                ],
+            )
+
             for row in result:
                 x.append(row[0])
                 y.append(row[1])
@@ -208,9 +228,10 @@ def choice6(dbConn):
             plt.xticks(x, fontsize=6)
             plt.show()
 
-#Takes the input of a station and a year, and prints the monthly ridership for that station and that year, with an option to plot the data as well
+
+# Takes the input of a station and a year, and prints the monthly ridership for that station and that year, with an option to plot the data as well
 def choice7(dbConn):
-    #Initial inputs and DB setup
+    # Initial inputs and DB setup
     inp = input("\nEnter a station name (wildcards _ and %): ")
 
     dbCursor = dbConn.cursor()
@@ -218,13 +239,13 @@ def choice7(dbConn):
     dbCursor.execute(sql, [inp])
     name = dbCursor.fetchall()
 
-    #Checking if station is found/singular, if it is year is asked
+    # Checking if station is found/singular, if it is year is asked
     if len(name) == 0:
         print("**No station found...")
     elif len(name) > 1:
         print("**Multiple stations found...")
     else:
-        #After year is asked, monthly ridership for that year/station is printed, and option to plot is asked
+        # After year is asked, monthly ridership for that year/station is printed, and option to plot is asked
         year = input("Enter a year: ")
         sql = "Select strftime('%m',Ride_Date) as Month, sum(Num_Riders) from Ridership join Stations on Stations.Station_ID = Ridership.Station_ID where Station_Name = ? and strftime('%Y',Ride_Date) = ? group by Month order by Month asc;"
         dbCursor.execute(sql, [name[0][0], year])
@@ -236,7 +257,7 @@ def choice7(dbConn):
             date = row[0] + "/" + year
             print(date, ":", f"{row[1]:,}")
 
-        #Plotting portion starts here
+        # Plotting portion starts here
         plot = input("Plot? (y/n) ")
 
         if plot == "y":
@@ -255,9 +276,10 @@ def choice7(dbConn):
             plt.plot(x, y)
             plt.show()
 
-#Takes input of two station names and a year, prints the first and last 5 daily ridership days for each station in that given year, then has an optional plot that shows the fully range of ridership for each station in that year
+
+# Takes input of two station names and a year, prints the first and last 5 daily ridership days for each station in that given year, then has an optional plot that shows the fully range of ridership for each station in that year
 def choice8(dbConn):
-    #Taking initial inputs and setting up DB
+    # Taking initial inputs and setting up DB
     year = input("\nYear to compare against? ")
     station1 = input("\nEnter station 1 (wildcards _ and %): ")
 
@@ -266,7 +288,7 @@ def choice8(dbConn):
     dbCursor.execute(sql, [station1])
     name1 = dbCursor.fetchall()
 
-    #Checking if that station is found/singular, if it is input is taken for the second station
+    # Checking if that station is found/singular, if it is input is taken for the second station
     if len(name1) == 0:
         print("**No station found...")
     elif len(name1) > 1:
@@ -276,7 +298,7 @@ def choice8(dbConn):
         dbCursor.execute(sql, [station2])
         name2 = dbCursor.fetchall()
 
-        #Checking if that station is found/singular, if it is the information for both stations is printed and plot option is asked
+        # Checking if that station is found/singular, if it is the information for both stations is printed and plot option is asked
         if len(name2) == 0:
             print("**No station found...")
         elif len(name2) > 1:
@@ -309,7 +331,7 @@ def choice8(dbConn):
                     print(row[0], row[1])
                 count = count + 1
 
-            #Plotting portion starts here
+            # Plotting portion starts here
             plot = input("Plot? (y/n) ")
 
             if plot == "y":
@@ -337,9 +359,10 @@ def choice8(dbConn):
                 plt.legend(loc="upper right")
                 plt.show()
 
-#Takes a latitude and longitude, prints all station names and their related coordinates that are within 1 square mile of the given coordinates. Then there is an optional plot, that will label a picture of chicago obtained from OpenStreetMaps with said station names, plotted where the stations are in the picture
+
+# Takes a latitude and longitude, prints all station names and their related coordinates that are within 1 square mile of the given coordinates. Then there is an optional plot, that will label a picture of chicago obtained from OpenStreetMaps with said station names, plotted where the stations are in the picture
 def choice9(dbConn):
-    #Taking initial inputs and setting up DB
+    # Taking initial inputs and setting up DB
     dbCursor = dbConn.cursor()
     lat = input("\nEnter a latitude: ")
     lat = float(lat)
@@ -353,7 +376,7 @@ def choice9(dbConn):
         if lon > -87 or lon < -88:
             print("**Longitude entered is out of bounds...")
         else:
-            #Finding the latitude and longitude bounds for stations within 1 square mile
+            # Finding the latitude and longitude bounds for stations within 1 square mile
             latBound = 1 / 69
             lonBound = 1 / 51
 
@@ -371,7 +394,7 @@ def choice9(dbConn):
             dbCursor.execute(sql, [lowLat, upLat, lowLon, upLon])
             result = dbCursor.fetchall()
 
-            #Check if there are any stations found, if there are print them out and ask to plot
+            # Check if there are any stations found, if there are print them out and ask to plot
             if len(result) == 0:
                 print("**No stations found...")
             else:
@@ -380,7 +403,7 @@ def choice9(dbConn):
                     cords = "(" + str(row[1]) + ", " + str(row[2]) + ")"
                     print(row[0], ":", cords)
 
-                #Plotting portions starts here
+                # Plotting portions starts here
                 plot = input("\nPlot? (y/n) ")
 
                 if plot == "y":
@@ -394,7 +417,7 @@ def choice9(dbConn):
 
                     for row in result:
                         plt.annotate(row[0], (row[2], row[1]))
-                        
+
                     plt.xlim([-87.9277, -87.5569])
                     plt.ylim([41.7012, 42.0868])
                     plt.show()
